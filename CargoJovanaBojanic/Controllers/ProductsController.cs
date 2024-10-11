@@ -198,7 +198,7 @@ namespace CargoJovanaBojanic.Controllers
                 await _repository.CreateOne(product);
                 await _repository.SaveChanges();
 
-                return Ok("Proizvod je uspešno kreiran.");
+                return Ok(product);
             }
             catch (Exception ex)
             {
@@ -262,6 +262,30 @@ namespace CargoJovanaBojanic.Controllers
             catch (Exception ex)
             {
                 return StatusCode(500, ex.Message);
+            }
+        }
+
+        /// <summary>
+        /// Povezuje proizvod sa kategorijom tako što kreira novu stavku u tabeli ProductCategory.
+        /// </summary>
+        /// <param name="productCategoryDto">Objekat koji sadrži ProductId i CategoryId za povezivanje.</param>
+        /// <returns>Vraća IActionResult koji označava uspeh ili neuspeh operacije.</returns>
+        [HttpPost("productCategories/create")]
+        public async Task<IActionResult> LinkProductWithCategory([FromBody] ProductCategoryDto productCategoryDto)
+        {
+            using (var dbContext = new ProductCategoryDbContext())
+            {
+                var productCategory = new ProductCategory
+                {
+                    ProductId = productCategoryDto.ProductId,
+                    CategoryId = productCategoryDto.CategoryId
+                };
+
+                dbContext.ProductCategories.Add(productCategory);
+
+                await dbContext.SaveChangesAsync();
+
+                return Ok();
             }
         }
     }

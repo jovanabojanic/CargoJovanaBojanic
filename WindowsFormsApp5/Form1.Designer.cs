@@ -59,6 +59,7 @@
             button2 = new System.Windows.Forms.Button();
             dataGridViewCategories = new System.Windows.Forms.DataGridView();
             searchByCatbtn = new System.Windows.Forms.Button();
+            cmbCategories = new System.Windows.Forms.ComboBox();
             ((System.ComponentModel.ISupportInitialize)dataGridView1).BeginInit();
             groupBox1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)categoryDTOBindingSource).BeginInit();
@@ -98,6 +99,7 @@
             // 
             // groupBox1
             // 
+            groupBox1.Controls.Add(cmbCategories);
             groupBox1.Controls.Add(label4);
             groupBox1.Controls.Add(label3);
             groupBox1.Controls.Add(label2);
@@ -349,6 +351,14 @@
             searchByCatbtn.UseVisualStyleBackColor = true;
             searchByCatbtn.Click += searchByCatbtn_Click;
             // 
+            // cmbCategories
+            // 
+            cmbCategories.FormattingEnabled = true;
+            cmbCategories.Location = new System.Drawing.Point(311, 22);
+            cmbCategories.Name = "cmbCategories";
+            cmbCategories.Size = new System.Drawing.Size(151, 28);
+            cmbCategories.TabIndex = 11;
+            // 
             // Form1
             // 
             AutoScaleDimensions = new System.Drawing.SizeF(8F, 20F);
@@ -414,6 +424,8 @@
         private System.Windows.Forms.DataGridView dataGridViewCategories;
         private System.Windows.Forms.Button searchByCatbtn;
         private System.Windows.Forms.BindingSource categoryDTOBindingSource;
+        private System.Windows.Forms.ComboBox comboBox1;
+        private System.Windows.Forms.ComboBox cmbCategories;
     }
 }
 

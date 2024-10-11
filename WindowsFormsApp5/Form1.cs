@@ -108,6 +108,11 @@ namespace WindowsFormsApp5
                     }
 
                     dataGridViewCategories.DataSource = categories;
+
+                    cmbCategories.DataSource = categories;
+                    cmbCategories.DisplayMember = "CategoryName";
+                    cmbCategories.ValueMember = "CategoryId";
+
                 }
                 else
                 {
@@ -186,9 +191,10 @@ namespace WindowsFormsApp5
             if (string.IsNullOrWhiteSpace(productName.Text) ||
                 string.IsNullOrWhiteSpace(price.Text) ||
                 string.IsNullOrWhiteSpace(description.Text) ||
-                string.IsNullOrWhiteSpace(stockQuantity.Text))
+                string.IsNullOrWhiteSpace(stockQuantity.Text) ||
+                cmbCategories.SelectedValue == null) 
             {
-                MessageBox.Show("Sva polja moraju biti popunjena.");
+                MessageBox.Show("Sva polja, uključujući kategoriju, moraju biti popunjena.");
                 return;
             }
 
@@ -205,16 +211,60 @@ namespace WindowsFormsApp5
 
             try
             {
+                // Pošalji zahtev za kreiranje proizvoda
                 var response = await _httpClient.PostAsync($"{_baseApiUrl}products/create", content);
 
                 if (response.IsSuccessStatusCode)
                 {
-                    MessageBox.Show("Product created successfully!");
-                    LoadData();
+                    // Učitaj odgovor u JSON formatu
+                    var createdProductJson = await response.Content.ReadAsStringAsync();
+
+                    var options = new JsonSerializerOptions
+                    {
+                        PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+                        PropertyNameCaseInsensitive = true,
+                    };
+
+                    try
+                    {
+                        var createdProduct = JsonSerializer.Deserialize<Product>(createdProductJson, options);
+                        if (createdProduct == null)
+                        {
+                            MessageBox.Show("Deserialization returned null.");
+                        }
+                        else
+                        {
+                            var productCategory = new ProductCategoryDto
+                            {
+                                ProductId = createdProduct.ProductId,
+                                CategoryId = (int)cmbCategories.SelectedValue 
+                            };
+
+                            var jsonContent1 = JsonSerializer.Serialize(productCategory);
+                            var content1 = new StringContent(jsonContent1, Encoding.UTF8, "application/json");
+
+                            var linkResponse = await _httpClient.PostAsync($"{_baseApiUrl}productCategories/create", content1);
+
+                            if (linkResponse.IsSuccessStatusCode)
+                            {
+                                MessageBox.Show("Proizvod kreiran i uspesno spojen sa kategorijom!");
+                            }
+                            else
+                            {
+                                MessageBox.Show("Proizvod kreiran, ali nije uspeo sa se poveze sa kategorijom. Error: " + linkResponse.ReasonPhrase);
+                            }
+                        }
+
+                        LoadData();
+                    }
+                    catch (JsonException ex)
+                    {
+                        MessageBox.Show($"Deserialization error: {ex.Message}");
+                    }
                 }
                 else
                 {
-                    MessageBox.Show("Failed to create product. Error: " + response.ReasonPhrase);
+                    MessageBox.Show("Nije mogice kreirati proizvod. Error: " + response.ReasonPhrase);
                 }
             }
             catch (Exception ex)
@@ -222,7 +272,6 @@ namespace WindowsFormsApp5
                 MessageBox.Show("Error: " + ex.Message);
             }
         }
-
         private void searchAllBtn_Click(object sender, EventArgs e)
         {
             LoadData();
